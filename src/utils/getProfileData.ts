@@ -1,12 +1,12 @@
 import nullthrows from 'nullthrows';
-import {SubjectAccessToken} from 'types';
+import { SubjectAccessToken } from 'types';
 
 export async function getProfileData(url: URL): Promise<FormattedProfileData> {
   const parser = new DOMParser();
 
   const fetchOptions = {} as any;
-  const {accessToken} = await requestAccessToken(url);
-  fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
+  const { accessToken } = await requestAccessToken(url);
+  fetchOptions.headers = { Authorization: `Bearer ${accessToken}` };
 
   url.searchParams.set('profile_liquid', 'true');
   const response = await fetch(url.href, fetchOptions);
@@ -31,16 +31,21 @@ function noProfileFound(document: HTMLDocument) {
   return document.querySelector('#liquidProfileData') === null;
 }
 
-function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
-  return new Promise((resolve, reject) => {
+async function requestAccessToken({ origin }: URL): Promise<SubjectAccessToken> {
+  let executeScript = chrome.tabs.executeScript({
+    file: "/detectShopify.js"
+  })
+
+  await Promise.resolve(executeScript);
+  return await new Promise((resolve, reject) => {
     return chrome.runtime.sendMessage(
-      {type: 'request-core-access-token', origin},
-      ({token, error}) => {
+      { type: 'request-core-access-token', origin },
+      ({ token, error }) => {
         if (error) {
           return reject(error);
         }
         return resolve(token);
-      },
+      }
     );
   });
 }
@@ -64,9 +69,8 @@ function formatLiquidProfileData(
     } else {
       name = entry.partial;
       const partialParts = entry.partial.split(':');
-      filepath = `${partialParts[0]}s/${partialParts[1]}${
-        /\.json$/.test(name) ? '' : '.liquid'
-      }`;
+      filepath = `${partialParts[0]}s/${partialParts[1]}${/\.json$/.test(name) ? '' : '.liquid'
+        }`;
     }
 
     return {
