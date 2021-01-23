@@ -1,12 +1,12 @@
 import nullthrows from 'nullthrows';
-import { SubjectAccessToken } from 'types';
+import {SubjectAccessToken} from 'types';
 
 export async function getProfileData(url: URL): Promise<FormattedProfileData> {
   const parser = new DOMParser();
 
   const fetchOptions = {} as any;
-  const { accessToken } = await requestAccessToken(url);
-  fetchOptions.headers = { Authorization: `Bearer ${accessToken}` };
+  const {accessToken} = await requestAccessToken(url);
+  fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
 
   url.searchParams.set('profile_liquid', 'true');
   const response = await fetch(url.href, fetchOptions);
@@ -31,7 +31,7 @@ function noProfileFound(document: HTMLDocument) {
   return document.querySelector('#liquidProfileData') === null;
 }
 
-async function requestAccessToken({ origin }: URL): Promise<SubjectAccessToken> {
+async function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
   let executeScript = chrome.tabs.executeScript({
     file: "/detectShopify.js"
   })
@@ -69,7 +69,8 @@ function formatLiquidProfileData(
     } else {
       name = entry.partial;
       const partialParts = entry.partial.split(':');
-      filepath = `${partialParts[0]}s/${partialParts[1]}${/\.json$/.test(name) ? '' : '.liquid'
+      filepath = `${partialParts[0]}s/${partialParts[1]}${
+          /\.json$/.test(name) ? '' : '.liquid'
         }`;
     }
 
